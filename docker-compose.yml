@@ -1,0 +1,56 @@
+services:
+  # -------------------------------------------------------------
+  # Servicio 1: Motor de Base de Datos PostgreSQL 16
+  # Cambia los valores de POSTGRES_DB, POSTGRES_USER y
+  # POSTGRES_PASSWORD según tu proyecto.
+  # -------------------------------------------------------------
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: postgres_template
+    restart: always
+    environment:
+      POSTGRES_DB: your_db_name
+      POSTGRES_USER: your_user
+      POSTGRES_PASSWORD: your_password
+      TZ: America/Mazatlan
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - db_network
+
+  # -------------------------------------------------------------
+  # Servicio 2: Administrador Web pgAdmin 4
+  # Cambia el email y contraseña de acceso a pgAdmin.
+  # -------------------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_template
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: your_pgadmin_password
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8081:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - db_network
+    depends_on:
+      - postgres_db
+
+# -------------------------------------------------------------
+# Volúmenes Persistentes y Redes Internas
+# -------------------------------------------------------------
+volumes:
+  pgdata:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  db_network:
+    driver: bridge
